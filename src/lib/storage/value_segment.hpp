@@ -13,10 +13,6 @@ namespace opossum {
 template <typename T>
 class ValueSegment : public BaseSegment {
  public:
-  // TODO Check if this definition is actually necessary
-  // constructor
-  ValueSegment();
-
   // return the value at a certain position. If you want to write efficient operators, back off!
   AllTypeVariant operator[](const ChunkOffset chunk_offset) const final;
 

@@ -13,10 +13,6 @@
 
 namespace opossum {
 
-// TODO Check if this implementation is actually necessary
-template <typename T>
-ValueSegment<T>::ValueSegment() {}
-
 template <typename T>
 AllTypeVariant ValueSegment<T>::operator[](const ChunkOffset chunk_offset) const {
   PerformanceWarning("operator[] used");
