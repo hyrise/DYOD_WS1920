@@ -32,7 +32,6 @@ std::shared_ptr<BaseSegment> Chunk::get_segment(ColumnID column_id) const {
   return _columns[column_id];
 }
 
-// TODO Add a test for this method because it is not covered yet
 uint16_t Chunk::column_count() const {
   return _columns.size();
 }

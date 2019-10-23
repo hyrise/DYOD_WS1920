@@ -63,5 +63,12 @@ namespace opossum {
     }
   }
 
+  TEST_F(StorageChunkTest, GetColumnCount) {
+    EXPECT_EQ(c.column_count(), 0);
+    c.add_segment(int_value_segment);
+    EXPECT_EQ(c.column_count(), 1);
+    c.add_segment(string_value_segment);
+    EXPECT_EQ(c.column_count(), 2);
+  }
 
 }  // namespace opossum
