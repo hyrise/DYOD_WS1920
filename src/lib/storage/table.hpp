@@ -29,6 +29,7 @@ class Table : private Noncopyable {
 
   // we need to explicitly set the move constructor to default when
   // we overwrite the copy constructor
+  // TODO(anyone): Add tests for the copy and move constructors(?)
   Table(Table&&) = default;
   Table& operator=(Table&&) = default;
 
@@ -48,9 +49,11 @@ class Table : private Noncopyable {
   const Chunk& get_chunk(ChunkID chunk_id) const;
 
   // Adds a chunk to the table. If the first chunk is empty, it is replaced.
+  // TODO(anyone): Find out whether we should implement this method; if yes: implement and add test; if not: remove(?)
   void emplace_chunk(Chunk chunk);
 
   // Returns a list of all column names.
+  // TODO(anyone): Add a test for this method
   const std::vector<std::string>& column_names() const;
 
   // returns the column name of the nth column
