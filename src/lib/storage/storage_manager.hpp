@@ -30,20 +30,22 @@ class StorageManager : private Noncopyable {
   bool has_table(const std::string& name) const;
 
   // returns a list of all table names
+  // TODO(anyone): Add a test for this method
   std::vector<std::string> table_names() const;
 
   // prints information about all tables in the storage manager (name, #columns, #rows, #chunks)
+  // TODO(anyone): Add a test for this method
   void print(std::ostream& out = std::cout) const;
 
   // deletes the entire StorageManager and creates a new one, used especially in tests
   void reset();
 
+  // TODO(anyone): Add a test that validates that the copy/move(?) constructor can't be called
   StorageManager(StorageManager&&) = delete;
 
  protected:
   StorageManager() {}
   StorageManager& operator=(StorageManager&&) = default;
-
-  // Implementation goes here
+  std::map<std::string, std::shared_ptr<Table>> _tables;
 };
 }  // namespace opossum
