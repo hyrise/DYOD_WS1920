@@ -29,7 +29,6 @@ class Table : private Noncopyable {
 
   // we need to explicitly set the move constructor to default when
   // we overwrite the copy constructor
-  // TODO(anyone): Add tests for the copy and move constructors(?)
   Table(Table&&) = default;
   Table& operator=(Table&&) = default;
 
