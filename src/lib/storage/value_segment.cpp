@@ -16,8 +16,7 @@ namespace opossum {
 template <typename T>
 AllTypeVariant ValueSegment<T>::operator[](const ChunkOffset chunk_offset) const {
   PerformanceWarning("operator[] used");
-
-  return column_data[chunk_offset];
+  return (AllTypeVariant)column_data[chunk_offset];
 }
 
 template <typename T>
