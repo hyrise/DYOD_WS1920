@@ -38,7 +38,6 @@ class StorageManager : private Noncopyable {
   // deletes the entire StorageManager and creates a new one, used especially in tests
   void reset();
 
-  // TODO(anyone): Add a test that validates that the copy/move(?) constructor can't be called
   StorageManager(StorageManager&&) = delete;
 
  protected:
