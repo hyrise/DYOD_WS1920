@@ -20,14 +20,14 @@ void StorageManager::add_table(const std::string& name, std::shared_ptr<Table> t
 
 void StorageManager::drop_table(const std::string& name) {
   auto search = _tables.find(name);
-  DebugAssert(search != _tables.end(), "Tablename could not be found.")
+  DebugAssert(search != _tables.end(), "Tablename could not be found.");
   _tables.erase(name);
 }
 
 std::shared_ptr<Table> StorageManager::get_table(const std::string& name) const {
   auto search = _tables.find(name);
-  DebugAssert(search != _tables.end(), "Tablename could not be found.")
-  return search->second
+  DebugAssert(search != _tables.end(), "Tablename could not be found.");
+  return search->second;
 }
 
 bool StorageManager::has_table(const std::string& name) const {

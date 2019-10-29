@@ -10,9 +10,9 @@
 
 namespace opossum {
 
- class StorageChunkTest : public BaseTest {
-  protected:
-    void SetUp() override {
+class StorageChunkTest : public BaseTest {
+ protected:
+  void SetUp() override {
     int_value_segment = make_shared_by_data_type<BaseSegment, ValueSegment>("int");
     int_value_segment->append(4);
     int_value_segment->append(6);
@@ -64,6 +64,12 @@ TEST_F(StorageChunkTest, UnknownSegmentType) {
     auto wrapper = []() { make_shared_by_data_type<BaseSegment, ValueSegment>("weird_type"); };
     EXPECT_THROW(wrapper(), std::logic_error);
   }
+}
+
+TEST_F(StorageChunkTest, GetColumnCount) {
+  EXPECT_EQ(c.column_count(), 0u);
+  c.add_segment(int_value_segment);
+  EXPECT_EQ(c.column_count(), 1u);
 }
 
 }  // namespace opossum
