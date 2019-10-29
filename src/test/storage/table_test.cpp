@@ -33,7 +33,7 @@ TEST_F(StorageTableTest, ChunkCount) {
 TEST_F(StorageTableTest, GetChunk) {
   t.get_chunk(ChunkID{0});
   // TODO(anyone): Do we want checks here?
-  //EXPECT_THROW(t.get_chunk(ChunkID{0}), std::exception);
+  // EXPECT_THROW(t.get_chunk(ChunkID{0}), std::exception);
   t.append({4, "Hello,"});
   t.append({6, "world"});
   t.append({3, "!"});

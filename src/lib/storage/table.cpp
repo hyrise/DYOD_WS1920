@@ -35,16 +35,16 @@ void Table::add_column(const std::string& name, const std::string& type) {
 
 void Table::append(std::vector<AllTypeVariant> values) {
   // Check if the latest Chunk has already reached maximum size and create a new one if necessary
-  if(this->is_new_chunk_needed()){
+  if (this->is_new_chunk_needed()) {
     _chunks.push_back(std::make_shared<Chunk>());
 
-    for(auto type_name: _column_types){
+    for (auto type_name : _column_types) {
       auto segment = make_shared_by_data_type<BaseSegment, ValueSegment>(type_name);
       _chunks.back()->add_segment(segment);
     }
   }
 
-  _chunks.back()->append(values);  
+  _chunks.back()->append(values);
 }
 
 bool Table::is_new_chunk_needed() {

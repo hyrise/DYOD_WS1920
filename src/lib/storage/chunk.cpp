@@ -20,7 +20,7 @@ void Chunk::add_segment(std::shared_ptr<BaseSegment> segment) {
 
 void Chunk::append(const std::vector<AllTypeVariant>& values) {
   DebugAssert(values.size() == _chunk_columns.size(), "Size of values and segments need to match.");
-  for(std::size_t i = 0; i < _chunk_columns.size(); ++i){
+  for (std::size_t i = 0; i < _chunk_columns.size(); ++i) {
     _chunk_columns.at(i)->append(values.at(i));
   }
 }
@@ -34,7 +34,7 @@ uint16_t Chunk::column_count() const {
 }
 
 uint32_t Chunk::size() const {
-  if(!_chunk_columns.empty()){
+  if (!_chunk_columns.empty()) {
     return _chunk_columns.front()->size();
   }
 

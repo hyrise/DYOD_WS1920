@@ -37,15 +37,16 @@ bool StorageManager::has_table(const std::string& name) const {
 
 std::vector<std::string> StorageManager::table_names() const {
   std::vector<std::string> names;
-  for(auto pair: _tables){
+  for (auto pair : _tables) {
     names.push_back(pair.first);
   }
   return names;
 }
 
 void StorageManager::print(std::ostream& out) const {
-  for(auto pair: _tables){
-    out << pair.first << " | " << pair.second->column_count() << " | " << pair.second->row_count() << " | " << pair.second->chunk_count();
+  for (auto pair : _tables) {
+    out << pair.first << " | " << pair.second->column_count() << " | "
+        << pair.second->row_count() << " | " << pair.second->chunk_count();
   }
 }
 
