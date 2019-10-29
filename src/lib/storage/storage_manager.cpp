@@ -45,9 +45,6 @@ void StorageManager::print(std::ostream& out) const {
   }
 }
 
-void StorageManager::reset() {
-  // TODO(anyone): Find out whether this is the correct way or whether the Singleton instance itself has to be deleted
-  _tables.clear();
-}
+void StorageManager::reset() { _tables.clear(); }
 
 }  // namespace opossum
