@@ -55,4 +55,25 @@ TEST_F(StorageStorageManagerTest, GetTableNames) {
   EXPECT_EQ(sm.table_names(), (std::vector<std::string>{"first_table", "second_table"}));
 }
 
+TEST_F(StorageStorageManagerTest, Print) {
+  auto& sm = StorageManager::get();
+  std::ostringstream oss;
+  sm.print(oss);
+  EXPECT_EQ(oss.str(), "first_table, 0, 0, 1\nsecond_table, 0, 0, 1\n");
+  sm.get_table("second_table")->add_column("column_name", "string");
+  oss.str("");
+  sm.print(oss);
+  // Column count of "second_table" has to have increased (from 0 to 1)
+  EXPECT_EQ(oss.str(), "first_table, 0, 0, 1\nsecond_table, 1, 0, 1\n");
+  sm.get_table("second_table")->append({"Hello world"});
+  sm.get_table("second_table")->append({"Hello world"});
+  sm.get_table("second_table")->append({"Hello world"});
+  sm.get_table("second_table")->append({"Hello world"});
+  sm.get_table("second_table")->append({"Hello world"});
+  oss.str("");
+  sm.print(oss);
+  // Row count of "second_table" has to increase from 0 to 5; chunk count has to increase from 1 to 2
+  EXPECT_EQ(oss.str(), "first_table, 0, 0, 1\nsecond_table, 1, 5, 2\n");
+}
+
 }  // namespace opossum

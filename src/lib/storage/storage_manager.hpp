@@ -33,7 +33,6 @@ class StorageManager : private Noncopyable {
   std::vector<std::string> table_names() const;
 
   // prints information about all tables in the storage manager (name, #columns, #rows, #chunks)
-  // TODO(anyone): Add a test for this method
   void print(std::ostream& out = std::cout) const;
 
   // deletes the entire StorageManager and creates a new one, used especially in tests
