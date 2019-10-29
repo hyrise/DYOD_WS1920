@@ -19,12 +19,9 @@ void Chunk::add_segment(std::shared_ptr<BaseSegment> segment) {
 }
 
 void Chunk::append(const std::vector<AllTypeVariant>& values) {
-  // TODO: Refactor Helper
   DebugAssert(values.size() == _chunk_columns.size(), "Size of values and segments need to match.");
-  int helper = 0;
-  for(auto value: values){
-    _chunk_columns.at(helper)->append(value);
-    helper++;
+  for(std::size_t i = 0; i < _chunk_columns.size(); ++i){
+    _chunk_columns.at(i)->append(values.at(i));
   }
 }
 
@@ -41,6 +38,7 @@ uint32_t Chunk::size() const {
     return _chunk_columns.front()->size();
   }
 
+  // Fallback in case no ValueSegment has been added yet.
   return 0;
 }
 

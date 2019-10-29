@@ -23,7 +23,10 @@ Table::Table(const uint32_t chunk_size) {
 }
 
 void Table::add_column(const std::string& name, const std::string& type) {
-  DebugAssert(_chunks.size() == 1 && _chunks.front()->size() == 0, "Columns may only be added to an empty table.");
+  DebugAssert(this->is_empty(), "Columns may only be added to an empty table.");
+  auto search = _column_name_mapping.find(name);
+  DebugAssert(search == _column_name_mapping.end(), "Column names may not be duplicated");
+  _column_name_mapping.insert({ name, (ColumnID) _column_names.size() });
   _column_names.push_back(name);
   _column_types.push_back(type);
   auto segment = make_shared_by_data_type<BaseSegment, ValueSegment>(type);
@@ -31,14 +34,21 @@ void Table::add_column(const std::string& name, const std::string& type) {
 }
 
 void Table::append(std::vector<AllTypeVariant> values) {
-  if(_chunks.back()->size() >= _max_chunk_size){
+  // Check if the latest Chunk has already reached maximum size and create a new one if necessary
+  if(this->is_new_chunk_needed()){
     _chunks.push_back(std::make_shared<Chunk>());
+
     for(auto type_name: _column_types){
       auto segment = make_shared_by_data_type<BaseSegment, ValueSegment>(type_name);
       _chunks.back()->add_segment(segment);
     }
   }
+
   _chunks.back()->append(values);  
+}
+
+bool Table::is_new_chunk_needed() {
+  return _chunks.back()->size() >= _max_chunk_size;
 }
 
 uint16_t Table::column_count() const {
@@ -46,6 +56,7 @@ uint16_t Table::column_count() const {
 }
 
 uint64_t Table::row_count() const {
+  // Since we cannot delete data, all old chunks will have maximum chunk size
   return ((_chunks.size() - 1) * _max_chunk_size) + _chunks.back()->size();
 }
 
@@ -54,19 +65,17 @@ ChunkID Table::chunk_count() const {
 }
 
 ColumnID Table::column_id_by_name(const std::string& column_name) const {
-  uint16_t helper = 0;
-  for(auto name: _column_names){
-    if(column_name == name){
-      return (ColumnID) helper;
-    }
-    helper++;
-  }
-  DebugAssert(0 == 1, "Invalid Column Name");
-  return (ColumnID) 0;
+  auto search = _column_name_mapping.find(column_name);
+  DebugAssert(search != _column_name_mapping.end(), "Could not find column_name");
+  return search->second;
 }
 
 uint32_t Table::max_chunk_size() const {
   return _max_chunk_size;
+}
+
+bool Table::is_empty() {
+  return _chunks.size() == 1 && _chunks.front()->size() == 0;
 }
 
 const std::vector<std::string>& Table::column_names() const {

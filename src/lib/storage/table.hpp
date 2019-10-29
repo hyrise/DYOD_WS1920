@@ -7,6 +7,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <unordered_map>
 
 #include "base_segment.hpp"
 #include "chunk.hpp"
@@ -81,5 +82,12 @@ class Table : private Noncopyable {
   std::vector<std::shared_ptr<Chunk>> _chunks;
   std::vector<std::string> _column_names;
   std::vector<std::string> _column_types;
+  std::unordered_map<std::string, ColumnID> _column_name_mapping;
+
+  // check if the latest chunk has reached the maximum size
+  bool is_new_chunk_needed();
+
+  // check if the table is currently empty
+  bool is_empty();
 };
 }  // namespace opossum

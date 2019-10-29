@@ -17,23 +17,22 @@ template <typename T>
 AllTypeVariant ValueSegment<T>::operator[](const ChunkOffset chunk_offset) const {
   PerformanceWarning("operator[] used");
 
-  return column_data[chunk_offset];
+  return (AllTypeVariant) _values[chunk_offset];
 }
 
 template <typename T>
 void ValueSegment<T>::append(const AllTypeVariant& val) {
-  T data_value = type_cast<T>(val);
-  column_data.push_back(data_value);
+  _values.push_back(type_cast<T>(val));
 }
 
 template <typename T>
 size_t ValueSegment<T>::size() const {
-  return column_data.size();
+  return _values.size();
 }
 
 template <typename T>
 const std::vector<T>& ValueSegment<T>::values() const {
-  return column_data;
+  return _values;
 }
 
 EXPLICITLY_INSTANTIATE_DATA_TYPES(ValueSegment);
