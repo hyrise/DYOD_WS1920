@@ -30,7 +30,6 @@ class StorageManager : private Noncopyable {
   bool has_table(const std::string& name) const;
 
   // returns a list of all table names
-  // TODO(anyone): Add a test for this method
   std::vector<std::string> table_names() const;
 
   // prints information about all tables in the storage manager (name, #columns, #rows, #chunks)
