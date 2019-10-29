@@ -41,7 +41,7 @@ void Table::append(const std::vector<AllTypeVariant> values) {
   std::shared_ptr<Chunk> last_chunk = _chunks.back();
   if (last_chunk->size() == _maximum_chunk_size) {
     auto new_chunk = std::make_shared<Chunk>();
-    for (auto const& column_type: _column_types) {
+    for (auto const& column_type : _column_types) {
       new_chunk->add_segment(make_shared_by_data_type<BaseSegment, ValueSegment>(column_type));
     }
     _chunks.push_back(new_chunk);
