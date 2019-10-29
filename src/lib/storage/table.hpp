@@ -48,7 +48,6 @@ class Table : private Noncopyable {
   const Chunk& get_chunk(ChunkID chunk_id) const;
 
   // Adds a chunk to the table. If the first chunk is empty, it is replaced.
-  // TODO(anyone): Find out whether we should implement this method; if yes: implement and add test; if not: remove(?)
   void emplace_chunk(Chunk chunk);
 
   // Returns a list of all column names.
