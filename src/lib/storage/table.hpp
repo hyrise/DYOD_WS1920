@@ -52,7 +52,6 @@ class Table : private Noncopyable {
   void emplace_chunk(Chunk chunk);
 
   // Returns a list of all column names.
-  // TODO(anyone): Add a test for this method
   const std::vector<std::string>& column_names() const;
 
   // returns the column name of the nth column

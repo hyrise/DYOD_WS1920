@@ -57,6 +57,8 @@ TEST_F(StorageTableTest, GetColumnName) {
   // EXPECT_THROW(t.column_name(ColumnID{2}), std::exception);
 }
 
+TEST_F(StorageTableTest, GetColumnNames) { EXPECT_EQ(t.column_names(), (std::vector<std::string>{"col_1", "col_2"})); }
+
 TEST_F(StorageTableTest, GetColumnType) {
   EXPECT_EQ(t.column_type(ColumnID{0}), "int");
   EXPECT_EQ(t.column_type(ColumnID{1}), "string");
