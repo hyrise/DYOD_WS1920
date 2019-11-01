@@ -5,9 +5,9 @@
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
-#include <unordered_map>
 
 #include "base_segment.hpp"
 #include "chunk.hpp"
@@ -76,6 +76,9 @@ class Table : private Noncopyable {
   // inserts a row at the end of the table
   // note this is slow and not thread-safe and should be used for testing purposes only
   void append(std::vector<AllTypeVariant> values);
+
+  // compresses a ValueColumn into a DictionaryColumn
+  void compress_chunk(ChunkID chunk_id);
 
  protected:
   uint32_t _max_chunk_size;
