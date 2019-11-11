@@ -7,6 +7,7 @@
 #include <utility>
 #include <vector>
 #include <iterator>
+#include <set>
 
 #include "all_type_variant.hpp"
 #include "type_cast.hpp"
