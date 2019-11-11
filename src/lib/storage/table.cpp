@@ -8,8 +8,10 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <thread>
 
 #include "value_segment.hpp"
+#include "dictionary_segment.hpp"
 
 #include "resolve_type.hpp"
 #include "types.hpp"
@@ -78,6 +80,26 @@ Chunk& Table::get_chunk(ChunkID chunk_id) { return *_chunks.at(chunk_id); }
 
 const Chunk& Table::get_chunk(ChunkID chunk_id) const { return *_chunks.at(chunk_id); }
 
-void Table::compress_chunk(ChunkID chunk_id) { throw std::runtime_error("Implement Table::compress_chunk"); }
+void Table::compress_chunk(ChunkID chunk_id) {
+
+  // create number of threads needed
+  auto n_columns = _chunks.at(chunk_id)->column_count();
+  // std::vector<thread> threads(n_columns);
+
+  for (auto segment = 0; segment < n_columns; ++segment){
+
+    // TODO: make this an own thread
+    // _chunks.at(chunk_id)->get_segment = (_chunks.at(chunk_id)->get_segment(segment));
+    std::cout << "hihi";
+
+  }
+
+  // threads.push_back(&your_function, args...);
+  // std::thread t1(callable);
+  // for (auto thread=0; thread<n_columns; thread++){
+  //  threads[thread].join();
+  // }
+
+}
 
 }  // namespace opossum
