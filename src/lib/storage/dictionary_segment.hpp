@@ -11,11 +11,11 @@
 #include "all_type_variant.hpp"
 #include "type_cast.hpp"
 #include "types.hpp"
+#include "base_attribute_vector.hpp"
+#include "base_segment.hpp"
+#include "fixed_size_attribute_vector.hpp"
 
 namespace opossum {
-
-class BaseAttributeVector;
-class BaseSegment;
 
 // Even though ValueIDs do not have to use the full width of ValueID (uint32_t), this will also work for smaller ValueID
 // types (uint8_t, uint16_t) since after a down-cast INVALID_VALUE_ID will look like their numeric_limit::max()
@@ -28,8 +28,7 @@ class DictionarySegment : public BaseSegment {
   /**
    * Creates a Dictionary segment from a given value segment.
    */
-  explicit DictionarySegment(const std::shared_ptr<BaseSegment>& base_segment) : _dictionary(std::make_shared<std::vector<T>>()),
-  _attribute_vector(std::make_shared<std::vector<uint32_t>>())
+  explicit DictionarySegment(const std::shared_ptr<BaseSegment>& base_segment) : _dictionary(std::make_shared<std::vector<T>>())
   {
     std::vector<T> value_helper;
     for (size_t i = 0; i < base_segment->size();++i){
@@ -43,10 +42,14 @@ class DictionarySegment : public BaseSegment {
     for (auto it = dictionary_helper.begin(); it != dictionary_helper.end(); ) {
       _dictionary->emplace_back(std::move(dictionary_helper.extract(it++).value()));
     }
-    _attribute_vector->reserve(value_helper.size());
+
+    _choose_attribute_vector_width(_dictionary->size(), value_helper.size());
+
+    size_t attribute_iterator = 0;
     for (auto value : value_helper) {
-      auto dict_index = std::distance(_dictionary->begin(), std::upper_bound(_dictionary->begin(), _dictionary->end(), value));
-      _attribute_vector->push_back(dict_index - 1);
+      auto dict_index = (uint32_t) std::distance(_dictionary->begin(), std::upper_bound(_dictionary->begin(), _dictionary->end(), value));
+      _attribute_vector->set(attribute_iterator, (ValueID) --dict_index);
+      ++attribute_iterator;
     }
   };
 
@@ -55,19 +58,19 @@ class DictionarySegment : public BaseSegment {
 
   // return the value at a certain position. If you want to write efficient operators, back off!
   AllTypeVariant operator[](const ChunkOffset chunk_offset) const override {
-    auto helper = _attribute_vector->at(chunk_offset);
+    auto helper = _attribute_vector->get(chunk_offset);
     return (*_dictionary)[helper];
   };
 
   // return the value at a certain position.
   T get(const size_t chunk_offset) const {
-    auto helper = _attribute_vector->at(chunk_offset);
+    auto helper = _attribute_vector->get(chunk_offset);
     return _dictionary->at(helper);
   };
 
   // dictionary segments are immutable
   void append(const AllTypeVariant&) override {
-    DebugAssert(1, "Dictionary Segments are immutable");
+    DebugAssert(true, "Dictionary Segments are immutable");
   };
 
   // returns an underlying dictionary
@@ -139,7 +142,17 @@ class DictionarySegment : public BaseSegment {
 
  protected:
   std::shared_ptr<std::vector<T>> _dictionary;
-  std::shared_ptr<std::vector<uint32_t>> _attribute_vector;
+  std::shared_ptr<BaseAttributeVector> _attribute_vector;
+
+  void _choose_attribute_vector_width(size_t dictionary_size, const size_t attribute_vector_size) {
+    if (dictionary_size <= std::numeric_limits<uint8_t>::max()) {
+      _attribute_vector = std::make_shared<FixedSizeAttributeVector<uint8_t>>(attribute_vector_size);
+    } else if (dictionary_size <= std::numeric_limits<uint16_t>::max()) {
+      _attribute_vector = std::make_shared<FixedSizeAttributeVector<uint16_t>>(attribute_vector_size);
+    } else {
+      _attribute_vector = std::make_shared<FixedSizeAttributeVector<uint32_t>>(attribute_vector_size);
+    }
+  } 
 };
 
 }  // namespace opossum
