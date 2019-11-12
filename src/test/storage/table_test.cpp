@@ -71,24 +71,10 @@ TEST_F(StorageTableTest, GetColumnIdByName) {
 
 TEST_F(StorageTableTest, GetChunkSize) { EXPECT_EQ(t.max_chunk_size(), 2u); }
 
-TEST_F(StorageTableTest, CompressChunkIntoDictionarySegment) {
-  EXPECT_EQ(t.chunk_count(), 1u);
-  t.append({4, "Hello,"});
-  t.append({6, "world"});
-  t.append({3, "!"});
-  EXPECT_EQ(t.chunk_count(), 2u);
 
-  EXPECT_THROW(t.compress_chunk(ChunkID{2}), std::exception);
+TEST_F(StorageTableTest, CompressChunk) {
   t.compress_chunk(ChunkID{0});
-  EXPECT_EQ(t.chunk_count(), 3u);
-  //std::shared_ptr<BaseSegment> base_segment = t.get_chunk(ChunkID{3}).get_segment(ColumnID{0});
-  //auto col = opossum::make_shared_by_data_type<opossum::BaseSegment, opossum::DictionarySegment>("int", base_segment);
-  //auto dict_col = std::dynamic_pointer_cast<opossum::DictionarySegment<std::string>>(col);
-
-  //auto dict = dict_col->dictionary();
-  //EXPECT_EQ((*dict)[0], 3);
-  //EXPECT_EQ((*dict)[1], 4);
-  //EXPECT_EQ((*dict)[2], 6);
+  EXPECT_THROW(t.compress_chunk(ChunkID{2}), std::exception);
 }
 
 }  // namespace opossum

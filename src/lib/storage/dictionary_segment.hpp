@@ -149,7 +149,7 @@ class DictionarySegment : public BaseSegment {
     } else if (dictionary_size <= std::numeric_limits<uint16_t>::max()) {
       _attribute_vector = std::make_shared<FixedSizeAttributeVector<uint16_t>>(attribute_vector_size);
     } else {
-      DebugAssert(dictionary_size > std::numeric_limits<uint32_t>::max(),
+      DebugAssert(dictionary_size <= std::numeric_limits<uint32_t>::max(),
                   "A DictionarySegment cannot store more than 4294967295 Values");
       _attribute_vector = std::make_shared<FixedSizeAttributeVector<uint32_t>>(attribute_vector_size);
     }

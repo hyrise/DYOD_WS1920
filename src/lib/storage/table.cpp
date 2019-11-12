@@ -13,7 +13,6 @@
 
 #include "dictionary_segment.hpp"
 #include "value_segment.hpp"
-#include "dictionary_segment.hpp"
 
 #include "resolve_type.hpp"
 #include "types.hpp"
@@ -91,23 +90,28 @@ void Table::compress_chunk(ChunkID chunk_id) {
 
   // number of threads needed
   auto n_columns = chunk->column_count();
-  // std::vector<std::thread> threads(n_columns);
+  std::vector<std::thread> threads(n_columns);
+  std::vector<std::shared_ptr<BaseSegment>> dictionary_segments(n_columns);
+  // to enable threads to access specific position in vector
+  dictionary_segments.resize(n_columns);
 
-  for (int segment = 0; segment < n_columns; ++segment){
-
-    auto dictionary_segment =
-            make_shared_by_data_type<BaseSegment, DictionarySegment>(column_type((ColumnID) segment), chunk->get_segment((ColumnID) segment));
-    compressed_chunk->add_segment(dictionary_segment);
+  for (int segment = 0; segment < n_columns; ++segment) {
+    threads.push_back(std::thread([&] {
+        dictionary_segments[segment] =
+                make_shared_by_data_type<BaseSegment, DictionarySegment>
+                        (column_type((ColumnID) segment), chunk->get_segment((ColumnID) segment));
+    }));
   }
+
+  for (auto thread=0; thread < n_columns; thread++) {
+    threads[thread].join();
+  }
+
+  for (int segment = 0; segment < n_columns; ++segment) {
+    compressed_chunk->add_segment(dictionary_segments[segment]);
+  }
+
   _chunks[chunk_id] = std::move(compressed_chunk);
-
-  // threads.push_back(&your_function, args...);
-  // std::thread t1(callable);
-  // for (auto thread=0; thread<n_columns; thread++){
-  //  threads[thread].join();
-  // }
-
-
 }
 
 }  // namespace opossum
