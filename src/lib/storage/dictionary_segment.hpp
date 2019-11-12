@@ -141,9 +141,11 @@ class DictionarySegment : public BaseSegment {
   // returns the calculated memory usage
   // Bauen schlägt fehl, wenn hinter const final
   size_t estimate_memory_usage() const {
-    auto num_entries = _dictionary.size();
-    auto data_type_size = sizeof(T);
-    return sizeof(*this) + num_entries * data_type_size;
+    auto dic_size = _dictionary->size() * sizeof(T);
+    auto att_size = _attribute_vector->size() * sizeof(T);
+    //auto att_size = _attribute_vector->size() * sizeof(decltype(_dictionary)::element_type::value_type);
+
+    return dic_size + att_size;
 
   }
 
