@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 #include <thread>
-#include <future>
+#include <mutex>
 
 #include "dictionary_segment.hpp"
 #include "value_segment.hpp"
@@ -92,19 +92,26 @@ void Table::compress_chunk(ChunkID chunk_id) {
   auto n_columns = chunk->column_count();
   std::vector<std::thread> threads(n_columns);
   std::vector<std::shared_ptr<BaseSegment>> dictionary_segments(n_columns);
+  std::mutex segment_mutex;
+  std::mutex table_mutex;
   // to enable threads to access specific position in vector
-  dictionary_segments.resize(n_columns);
+  dictionary_segments.resize(n_columns, nullptr);
 
-  for (int segment = 0; segment < n_columns; ++segment) {
-    threads.push_back(std::thread([&] {
-        dictionary_segments.at(segment) =
-                make_shared_by_data_type<BaseSegment, DictionarySegment>
-                        (column_type((ColumnID) segment), chunk->get_segment((ColumnID) segment));
-    }));
+  for (size_t segment = 0; segment < dictionary_segments.size(); ++segment) {
+    threads.push_back(std::thread([&] (size_t seg) {
+        std::string data_type = column_type((ColumnID) seg);
+        std::shared_ptr<BaseSegment> current_segment = chunk->get_segment((ColumnID) seg);
+        auto compressed_chunk = make_shared_by_data_type<BaseSegment, DictionarySegment>
+                        (data_type, current_segment);
+
+        dictionary_segments[seg] = compressed_chunk;
+    }, segment));
   }
 
-  for (auto thread=0; thread < n_columns; thread++) {
-    threads.at(thread).join();
+  for (size_t thread=0; thread < threads.size(); thread++) {
+    if (threads[thread].joinable()) {
+      threads[thread].join();
+    }
   }
 
   for (int segment = 0; segment < n_columns; ++segment) {
