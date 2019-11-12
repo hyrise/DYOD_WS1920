@@ -54,5 +54,29 @@ TEST_F(StorageDictionarySegmentTest, LowerUpperBound) {
   EXPECT_EQ(dict_col->upper_bound(15), opossum::INVALID_VALUE_ID);
 }
 
-// TODO(student): You should add some more tests here (full coverage would be appreciated) and possibly in other files.
+TEST_F(StorageDictionarySegmentTest, GetDictionaryChunkOffSet) {
+    vc_str->append("Bill");
+    vc_str->append("Steve");
+    vc_str->append("Alexander");
+    vc_str->append("Steve");
+    vc_str->append("Hasso");
+    vc_str->append("Bill");
 
+    auto col = opossum::make_shared_by_data_type<opossum::BaseSegment, opossum::DictionarySegment>("string", vc_str);
+    auto dict_col = std::dynamic_pointer_cast<opossum::DictionarySegment<std::string>>(col);
+
+    EXPECT_EQ(dict_col->get(0), "Bill");
+    EXPECT_EQ(dict_col->get(2), "Alexander");
+    EXPECT_EQ(dict_col->get(4), "Hasso");
+}
+
+TEST_F(StorageDictionarySegmentTest, ReturnEstimateMemoryUsage) {
+    vc_int->append(1);
+    auto col = opossum::make_shared_by_data_type<opossum::BaseSegment, opossum::DictionarySegment>("int", vc_int);
+    auto dict_col = std::dynamic_pointer_cast<opossum::DictionarySegment<int>>(col);
+
+    // _dictionary: number of entries == 1 && size of integer type == 4
+    // _attribute_vector: number of entries == 1 && size of integer type == 4
+    // --> 4 + 4
+    EXPECT_EQ(dict_col->estimate_memory_usage(), size_t{8});
+}

@@ -10,6 +10,7 @@
 #include <vector>
 #include <thread>
 
+#include "dictionary_segment.hpp"
 #include "value_segment.hpp"
 #include "dictionary_segment.hpp"
 

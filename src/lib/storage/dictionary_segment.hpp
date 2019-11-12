@@ -135,7 +135,15 @@ class DictionarySegment : public BaseSegment {
   };
 
   // returns the calculated memory usage
-  size_t estimate_memory_usage() const;  // Bauen schlägt fehl, wenn hinter const final
+  // Bauen schlägt fehl, wenn hinter const final
+  size_t estimate_memory_usage() const {
+    auto dic_size = _dictionary->size() * sizeof(T);
+    auto att_size = _attribute_vector->size() * sizeof(T);
+    //auto att_size = _attribute_vector->size() * sizeof(decltype(_dictionary)::element_type::value_type);
+
+    return dic_size + att_size;
+
+  }
 
  protected:
   std::shared_ptr<std::vector<T>> _dictionary;
