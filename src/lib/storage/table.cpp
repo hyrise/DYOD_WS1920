@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "dictionary_segment.hpp"
 #include "value_segment.hpp"
 
 #include "resolve_type.hpp"
@@ -78,6 +79,33 @@ Chunk& Table::get_chunk(ChunkID chunk_id) { return *_chunks.at(chunk_id); }
 
 const Chunk& Table::get_chunk(ChunkID chunk_id) const { return *_chunks.at(chunk_id); }
 
-void Table::compress_chunk(ChunkID chunk_id) { throw std::runtime_error("Implement Table::compress_chunk"); }
+// TODO teresa: Im ersten Sprint vergessen. Muss noch getestet werden
+void Table::emplace_chunk(Chunk chunk) {
+  // if (_chunks.front()->size() == 0) {
+  //   //_chunks.insert(_chunks.begin(), std::make_shared<Chunk>(chunk));
+  //   _chunks.insert(_chunks.begin(), insert_chunk);
+  // } else {
+  //   //_chunks.push_back(std::make_shared<Chunk>(chunk));
+  //   _chunks.push_back(std::make_shared<Chunk>());
+  // }
+}
+
+void Table::compress_chunk(ChunkID chunk_id) {
+  // create new empty chunk
+  auto new_chunk = std::make_shared<Chunk>();
+  _chunks.push_back(new_chunk);
+
+  // add dictionary-encoded segments to the chunk
+  Chunk& to_compress_chunk = get_chunk(chunk_id);
+  auto chunk_columns = to_compress_chunk.column_count();
+
+  for (size_t index = 0; index < chunk_columns; ++index) {
+      auto segment = to_compress_chunk.get_segment(ColumnID{index});
+      std::string type_name = column_type(ColumnID{index});
+      auto dic = make_shared_by_data_type<BaseSegment, DictionarySegment>(type_name, segment);
+      new_chunk->add_segment(dic);
+  }
+    _chunks[chunk_id] = new_chunk;
+}
 
 }  // namespace opossum
