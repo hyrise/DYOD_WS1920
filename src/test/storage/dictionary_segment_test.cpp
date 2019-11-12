@@ -76,7 +76,7 @@ TEST_F(StorageDictionarySegmentTest, ReturnEstimateMemoryUsage) {
     auto dict_col = std::dynamic_pointer_cast<opossum::DictionarySegment<int>>(col);
 
     // _dictionary: number of entries == 1 && size of integer type == 4
-    // _attribute_vector: number of entries == 1 && size of integer type == 4
-    // --> 4 + 4
-    EXPECT_EQ(dict_col->estimate_memory_usage(), size_t{8});
+    // _attribute_vector: number of entries == 1 && size of uint8_t type == 1
+    // --> 4 + 1
+    EXPECT_EQ(dict_col->estimate_memory_usage(), size_t{5});
 }
