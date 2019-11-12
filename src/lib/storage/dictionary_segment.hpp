@@ -12,11 +12,11 @@
 #include "all_type_variant.hpp"
 #include "type_cast.hpp"
 #include "types.hpp"
+#include "base_attribute_vector.hpp"
+#include "base_segment.hpp"
+#include "fixed_size_attribute_vector.hpp"
 
 namespace opossum {
-
-class BaseAttributeVector;
-class BaseSegment;
 
 // Even though ValueIDs do not have to use the full width of ValueID (uint32_t), this will also work for smaller ValueID
 // types (uint8_t, uint16_t) since after a down-cast INVALID_VALUE_ID will look like their numeric_limit::max()
@@ -29,25 +29,25 @@ class DictionarySegment : public BaseSegment {
   /**
    * Creates a Dictionary segment from a given value segment.
    */
-  explicit DictionarySegment(const std::shared_ptr<BaseSegment>& base_segment) : _dictionary(std::make_shared<std::vector<T>>()),
-  _attribute_vector(std::make_shared<std::vector<uint32_t>>())
+  explicit DictionarySegment(const std::shared_ptr<BaseSegment>& base_segment) : _dictionary(std::make_shared<std::vector<T>>())
   {
-    std::vector<T> value_helper;
-    for (size_t i = 0; i < base_segment->size();++i){
-      value_helper.push_back(type_cast<T>((*base_segment)[i]));
-    }
+    size_t attribute_vector_size = 0;
     std::set<T> dictionary_helper;
-    for (auto value : value_helper) {
-      dictionary_helper.insert(value);
+    for (size_t segment_iterator = 0; segment_iterator < base_segment->size();++segment_iterator) {
+      dictionary_helper.insert(type_cast<T>((*base_segment)[segment_iterator]));
+      attribute_vector_size++;
     }
     _dictionary->reserve(dictionary_helper.size());
     for (auto it = dictionary_helper.begin(); it != dictionary_helper.end(); ) {
       _dictionary->emplace_back(std::move(dictionary_helper.extract(it++).value()));
     }
-    _attribute_vector->reserve(value_helper.size());
-    for (auto value : value_helper) {
-      auto dict_index = std::distance(_dictionary->begin(), std::upper_bound(_dictionary->begin(), _dictionary->end(), value));
-      _attribute_vector->push_back(dict_index - 1);
+
+    _set_attribute_vector(_dictionary->size(), attribute_vector_size);
+
+    for (size_t segment_iterator = 0; segment_iterator < base_segment->size();++segment_iterator) {
+      T current_attribute_value = type_cast<T>((*base_segment)[segment_iterator]);
+      auto dict_index = (uint32_t) std::distance(_dictionary->begin(), std::upper_bound(_dictionary->begin(), _dictionary->end(), current_attribute_value));
+      _attribute_vector->set(segment_iterator,(ValueID) --dict_index);
     }
   };
 
@@ -56,19 +56,19 @@ class DictionarySegment : public BaseSegment {
 
   // return the value at a certain position. If you want to write efficient operators, back off!
   AllTypeVariant operator[](const ChunkOffset chunk_offset) const override {
-    auto helper = _attribute_vector->at(chunk_offset);
+    auto helper = _attribute_vector->get(chunk_offset);
     return (*_dictionary)[helper];
   };
 
   // return the value at a certain position.
   T get(const size_t chunk_offset) const {
-    auto helper = _attribute_vector->at(chunk_offset);
+    auto helper = _attribute_vector->get(chunk_offset);
     return _dictionary->at(helper);
   };
 
   // dictionary segments are immutable
   void append(const AllTypeVariant&) override {
-    DebugAssert(1, "Dictionary Segments are immutable");
+    throw std::runtime_error("Dictionary Segments are immutable. They should not be changed");
   };
 
   // returns an underlying dictionary
@@ -77,7 +77,6 @@ class DictionarySegment : public BaseSegment {
   };
 
   // returns an underlying data structure
-  // TODO: Change back signature and implement Base Attribute Vector
   std::shared_ptr<BaseAttributeVector> attribute_vector() const{
     return _attribute_vector;
   };
@@ -135,12 +134,29 @@ class DictionarySegment : public BaseSegment {
     return _attribute_vector->size();
   };
 
-  // returns the calculated memory usage
-  size_t estimate_memory_usage() const;  // Bauen schlägt fehl, wenn hinter const final
+  // returns the calculated memory usage of the segment
+  size_t estimate_memory_usage() const {
+    auto dic_size = _dictionary->size() * sizeof(T);
+    auto att_size = _attribute_vector->size() * _attribute_vector->width();
+
+    return dic_size + att_size;
+
+  }
 
  protected:
   std::shared_ptr<std::vector<T>> _dictionary;
-  std::shared_ptr<std::vector<uint32_t>> _attribute_vector;
+  std::shared_ptr<BaseAttributeVector> _attribute_vector;
+
+  // set the attribute vector with the current width and length depending on the incoming data
+  void _set_attribute_vector(const size_t dictionary_size, const size_t attribute_vector_size) {
+    if (dictionary_size <= std::numeric_limits<uint8_t>::max()) {
+      _attribute_vector = std::make_shared<FixedSizeAttributeVector<uint8_t>>(attribute_vector_size);
+    } else if (dictionary_size <= std::numeric_limits<uint16_t>::max()) {
+      _attribute_vector = std::make_shared<FixedSizeAttributeVector<uint16_t>>(attribute_vector_size);
+    } else {
+      _attribute_vector = std::make_shared<FixedSizeAttributeVector<uint32_t>>(attribute_vector_size);
+    }
+  } 
 };
 
 }  // namespace opossum

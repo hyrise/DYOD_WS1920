@@ -11,6 +11,7 @@
 #include <thread>
 #include <future>
 
+#include "dictionary_segment.hpp"
 #include "value_segment.hpp"
 #include "dictionary_segment.hpp"
 
