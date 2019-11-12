@@ -134,12 +134,10 @@ class DictionarySegment : public BaseSegment {
     return _attribute_vector->size();
   };
 
-  // returns the calculated memory usage
-  // Bauen schlägt fehl, wenn hinter const final
+  // returns the calculated memory usage of the segment
   size_t estimate_memory_usage() const {
     auto dic_size = _dictionary->size() * sizeof(T);
-    auto att_size = _attribute_vector->size() * sizeof(T);
-    //auto att_size = _attribute_vector->size() * sizeof(decltype(_dictionary)::element_type::value_type);
+    auto att_size = _attribute_vector->size() * _attribute_vector->width();
 
     return dic_size + att_size;
 
