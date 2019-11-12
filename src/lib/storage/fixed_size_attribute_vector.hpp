@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "types.hpp"
 #include "base_attribute_vector.hpp"
 
@@ -12,12 +14,10 @@ template <typename T>
 class FixedSizeAttributeVector : public BaseAttributeVector {
  public:
   // Create a FixedSizeAttributeVector that is already resized depending on the number of elements
-  FixedSizeAttributeVector(const size_t number_of_elements) {
+  explicit FixedSizeAttributeVector(const size_t number_of_elements) {
     _attribute_storage.resize(number_of_elements);
   }
-  ~FixedSizeAttributeVector() override {
-
-  };
+  ~FixedSizeAttributeVector() override {};
 
   // return the ValueID at a given position
   ValueID get(const size_t i) const override {
@@ -39,8 +39,9 @@ class FixedSizeAttributeVector : public BaseAttributeVector {
     return sizeof(T);
   };
 
-  protected:
-    std::vector<T> _attribute_storage;
+ protected:
+  std::vector<T> _attribute_storage;
 };
+
 }  // namespace opossum
 
