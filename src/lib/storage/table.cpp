@@ -8,9 +8,11 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <thread>
 
 #include "dictionary_segment.hpp"
 #include "value_segment.hpp"
+#include "dictionary_segment.hpp"
 
 #include "resolve_type.hpp"
 #include "types.hpp"
@@ -79,33 +81,26 @@ Chunk& Table::get_chunk(ChunkID chunk_id) { return *_chunks.at(chunk_id); }
 
 const Chunk& Table::get_chunk(ChunkID chunk_id) const { return *_chunks.at(chunk_id); }
 
-// TODO teresa: Im ersten Sprint vergessen. Muss noch getestet werden
-void Table::emplace_chunk(Chunk chunk) {
-  // if (_chunks.front()->size() == 0) {
-  //   //_chunks.insert(_chunks.begin(), std::make_shared<Chunk>(chunk));
-  //   _chunks.insert(_chunks.begin(), insert_chunk);
-  // } else {
-  //   //_chunks.push_back(std::make_shared<Chunk>(chunk));
-  //   _chunks.push_back(std::make_shared<Chunk>());
-  // }
-}
-
 void Table::compress_chunk(ChunkID chunk_id) {
-  // create new empty chunk
-  auto new_chunk = std::make_shared<Chunk>();
-  _chunks.push_back(new_chunk);
 
-  // add dictionary-encoded segments to the chunk
-  Chunk& to_compress_chunk = get_chunk(chunk_id);
-  auto chunk_columns = to_compress_chunk.column_count();
+  // create number of threads needed
+  auto n_columns = _chunks.at(chunk_id)->column_count();
+  // std::vector<thread> threads(n_columns);
 
-  for (size_t index = 0; index < chunk_columns; ++index) {
-      auto segment = to_compress_chunk.get_segment(ColumnID{index});
-      std::string type_name = column_type(ColumnID{index});
-      auto dic = make_shared_by_data_type<BaseSegment, DictionarySegment>(type_name, segment);
-      new_chunk->add_segment(dic);
+  for (auto segment = 0; segment < n_columns; ++segment){
+
+    // TODO: make this an own thread
+    // _chunks.at(chunk_id)->get_segment = (_chunks.at(chunk_id)->get_segment(segment));
+    std::cout << "hihi";
+
   }
-    _chunks[chunk_id] = new_chunk;
+
+  // threads.push_back(&your_function, args...);
+  // std::thread t1(callable);
+  // for (auto thread=0; thread<n_columns; thread++){
+  //  threads[thread].join();
+  // }
+
 }
 
 }  // namespace opossum
