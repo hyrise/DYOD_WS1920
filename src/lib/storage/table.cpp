@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 #include <thread>
+#include <future>
 
 #include "dictionary_segment.hpp"
 #include "value_segment.hpp"
@@ -82,24 +83,28 @@ Chunk& Table::get_chunk(ChunkID chunk_id) { return *_chunks.at(chunk_id); }
 const Chunk& Table::get_chunk(ChunkID chunk_id) const { return *_chunks.at(chunk_id); }
 
 void Table::compress_chunk(ChunkID chunk_id) {
+  DebugAssert(chunk_id < _chunks.size(), "ChunkID out of range");
+  const auto chunk = _chunks[chunk_id];
+  auto compressed_chunk = std::make_shared<Chunk>();
 
-  // create number of threads needed
-  auto n_columns = _chunks.at(chunk_id)->column_count();
-  // std::vector<thread> threads(n_columns);
+  // number of threads needed
+  auto n_columns = chunk->column_count();
+  // std::vector<std::thread> threads(n_columns);
 
-  for (auto segment = 0; segment < n_columns; ++segment){
+  for (int segment = 0; segment < n_columns; ++segment){
 
-    // TODO: make this an own thread
-    // _chunks.at(chunk_id)->get_segment = (_chunks.at(chunk_id)->get_segment(segment));
-    std::cout << "hihi";
-
+    auto dictionary_segment =
+            make_shared_by_data_type<BaseSegment, DictionarySegment>(column_type((ColumnID) segment), chunk->get_segment((ColumnID) segment));
+    compressed_chunk->add_segment(dictionary_segment);
   }
+  _chunks[chunk_id] = std::move(compressed_chunk);
 
   // threads.push_back(&your_function, args...);
   // std::thread t1(callable);
   // for (auto thread=0; thread<n_columns; thread++){
   //  threads[thread].join();
   // }
+
 
 }
 
