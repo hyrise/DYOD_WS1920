@@ -4,19 +4,22 @@
 #include "base_attribute_vector.hpp"
 
 namespace opossum {
-
-// BaseAttributeVector is the abstract super class for all attribute vectors,
-// e.g., FixedSizeAttributeVector
+/*
+** FixedSizeAttributeVector is a template class that offers different sized implementations of
+** the BaseAttributeVector. These can be used to store encoded elements in the dicitonary segment
+*/
 template <typename T>
 class FixedSizeAttributeVector : public BaseAttributeVector {
  public:
+  // Create a FixedSizeAttributeVector that is already resized depending on the number of elements
   FixedSizeAttributeVector(const size_t number_of_elements) {
     _attribute_storage.resize(number_of_elements);
   }
   ~FixedSizeAttributeVector() override {
-    
+
   };
 
+  // return the ValueID at a given position
   ValueID get(const size_t i) const override {
     return (ValueID) _attribute_storage.at(i);
   };
@@ -31,7 +34,7 @@ class FixedSizeAttributeVector : public BaseAttributeVector {
     return _attribute_storage.size();
   };
 
-  // returns the width of biggest value id in bytes
+  // returns the width of a value ID in bytes
   AttributeVectorWidth width() const override {
     return sizeof(T);
   };

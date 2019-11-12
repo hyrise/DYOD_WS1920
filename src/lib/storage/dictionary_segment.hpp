@@ -31,26 +31,23 @@ class DictionarySegment : public BaseSegment {
    */
   explicit DictionarySegment(const std::shared_ptr<BaseSegment>& base_segment) : _dictionary(std::make_shared<std::vector<T>>())
   {
-    std::vector<T> value_helper;
-    for (size_t i = 0; i < base_segment->size();++i){
-      value_helper.push_back(type_cast<T>((*base_segment)[i]));
-    }
+    size_t attribute_vector_size = 0;
     std::set<T> dictionary_helper;
-    for (auto value : value_helper) {
-      dictionary_helper.insert(value);
+    for (size_t segment_iterator = 0; segment_iterator < base_segment->size();++segment_iterator) {
+      dictionary_helper.insert(type_cast<T>((*base_segment)[segment_iterator]));
+      attribute_vector_size++;
     }
     _dictionary->reserve(dictionary_helper.size());
     for (auto it = dictionary_helper.begin(); it != dictionary_helper.end(); ) {
       _dictionary->emplace_back(std::move(dictionary_helper.extract(it++).value()));
     }
 
-    _choose_attribute_vector_width(_dictionary->size(), value_helper.size());
+    _set_attribute_vector(_dictionary->size(), attribute_vector_size);
 
-    size_t attribute_iterator = 0;
-    for (auto value : value_helper) {
-      auto dict_index = (uint32_t) std::distance(_dictionary->begin(), std::upper_bound(_dictionary->begin(), _dictionary->end(), value));
-      _attribute_vector->set(attribute_iterator, (ValueID) --dict_index);
-      ++attribute_iterator;
+    for (size_t segment_iterator = 0; segment_iterator < base_segment->size();++segment_iterator) {
+      T current_attribute_value = type_cast<T>((*base_segment)[segment_iterator]);
+      auto dict_index = (uint32_t) std::distance(_dictionary->begin(), std::upper_bound(_dictionary->begin(), _dictionary->end(), current_attribute_value));
+      _attribute_vector->set(segment_iterator,(ValueID) --dict_index);
     }
   };
 
@@ -71,7 +68,7 @@ class DictionarySegment : public BaseSegment {
 
   // dictionary segments are immutable
   void append(const AllTypeVariant&) override {
-    DebugAssert(true, "Dictionary Segments are immutable");
+    throw std::runtime_error("Dictionary Segments are immutable. They should not be changed");
   };
 
   // returns an underlying dictionary
@@ -80,7 +77,6 @@ class DictionarySegment : public BaseSegment {
   };
 
   // returns an underlying data structure
-  // TODO: Change back signature and implement Base Attribute Vector
   std::shared_ptr<BaseAttributeVector> attribute_vector() const{
     return _attribute_vector;
   };
@@ -145,7 +141,8 @@ class DictionarySegment : public BaseSegment {
   std::shared_ptr<std::vector<T>> _dictionary;
   std::shared_ptr<BaseAttributeVector> _attribute_vector;
 
-  void _choose_attribute_vector_width(size_t dictionary_size, const size_t attribute_vector_size) {
+  // set the attribute vector with the current width and length depending on the incoming data
+  void _set_attribute_vector(const size_t dictionary_size, const size_t attribute_vector_size) {
     if (dictionary_size <= std::numeric_limits<uint8_t>::max()) {
       _attribute_vector = std::make_shared<FixedSizeAttributeVector<uint8_t>>(attribute_vector_size);
     } else if (dictionary_size <= std::numeric_limits<uint16_t>::max()) {
