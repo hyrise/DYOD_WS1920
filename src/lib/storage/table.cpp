@@ -95,18 +95,18 @@ void Table::compress_chunk(ChunkID chunk_id) {
 
   for (int segment = 0; segment < n_columns; ++segment) {
     threads.push_back(std::thread([&] {
-        dictionary_segments[segment] =
+        dictionary_segments.at(segment) =
                 make_shared_by_data_type<BaseSegment, DictionarySegment>
                         (column_type((ColumnID) segment), chunk->get_segment((ColumnID) segment));
     }));
   }
 
   for (auto thread=0; thread < n_columns; thread++) {
-    threads[thread].join();
+    threads.at(thread).join();
   }
 
   for (int segment = 0; segment < n_columns; ++segment) {
-    compressed_chunk->add_segment(dictionary_segments[segment]);
+    compressed_chunk->add_segment(dictionary_segments.at(segment));
   }
 
   _chunks[chunk_id] = std::move(compressed_chunk);
