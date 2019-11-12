@@ -13,7 +13,6 @@
 
 #include "dictionary_segment.hpp"
 #include "value_segment.hpp"
-#include "dictionary_segment.hpp"
 
 #include "resolve_type.hpp"
 #include "types.hpp"
@@ -94,7 +93,7 @@ void Table::compress_chunk(ChunkID chunk_id) {
   // to enable threads to access specific position in vector
   dictionary_segments.resize(n_columns);
 
-  for (int segment = 0; segment < n_columns; ++segment){
+  for (int segment = 0; segment < n_columns; ++segment) {
     threads.push_back(std::thread([&] {
         dictionary_segments[segment] =
                 make_shared_by_data_type<BaseSegment, DictionarySegment>
@@ -102,7 +101,7 @@ void Table::compress_chunk(ChunkID chunk_id) {
     }));
   }
 
-  for (auto thread=0; thread<n_columns; thread++){
+  for (auto thread=0; thread < n_columns; thread++) {
     threads[thread].join();
   }
 
@@ -111,7 +110,6 @@ void Table::compress_chunk(ChunkID chunk_id) {
   }
 
   _chunks[chunk_id] = std::move(compressed_chunk);
-
 }
 
 }  // namespace opossum
