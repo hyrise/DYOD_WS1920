@@ -92,10 +92,8 @@ void Table::compress_chunk(ChunkID chunk_id) {
   auto n_columns = chunk->column_count();
   std::vector<std::thread> threads(n_columns);
   std::vector<std::shared_ptr<BaseSegment>> dictionary_segments(n_columns);
-  std::mutex segment_mutex;
-  std::mutex table_mutex;
   // to enable threads to access specific position in vector
-  dictionary_segments.resize(n_columns, nullptr);
+  dictionary_segments.resize(n_columns);
 
   for (size_t segment = 0; segment < dictionary_segments.size(); ++segment) {
     threads.push_back(std::thread([&] (size_t seg) {
